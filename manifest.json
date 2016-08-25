@@ -3,7 +3,7 @@
 
   "name": "SimpleNotes",
   "description": "This extension allows for quick and simple copy paste notes",
-  "version": "1.0",
+  "version": "1.1",
   "icons": { "32": "note.png"},
   "browser_action": {
     "default_icon": "note.png",

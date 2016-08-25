@@ -1,6 +1,7 @@
 
 var docUrl = "";
-var authToken = "";
+var running = false;
+var ajaxQueue = [];
 var head = document.getElementsByTagName('head')[0];
 var script = document.createElement('script');
 script.type = 'text/javascript';
@@ -95,13 +96,29 @@ function captureCallback(callback){
   });
 }
 
+ // have function for first ajax call and then have it trigger another function that will make the next call in the queue on .ajaxComplete() then the next until queue is empty
+
+
 
 function putInDoc(dataobj){
-  $.ajax({
-     url: "https://script.google.com/macros/s/AKfycbwADtcsloxMU9h-_1Y_FXjW6JifgkWTeW-qh6fO0hd9ye8T5OTq/exec",
-     data: dataobj,
-     type: "GET"
-   });
+  if (running === false){
+    running = true;
+    $.ajax({
+       url: "https://script.google.com/macros/s/AKfycbwADtcsloxMU9h-_1Y_FXjW6JifgkWTeW-qh6fO0hd9ye8T5OTq/exec",
+       data: dataobj,
+       type: "GET",
+       success: function(){
+         running = false;
+         if (ajaxQueue.length > 0){
+           putInDoc(ajaxQueue.shift());
+         }
+       }
+     });
+  }else{
+    ajaxQueue.push(dataobj);
+  }
+
+   // could add to queue and call in order based of ajaxComplete.
 //   var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
 //
 //  // Create execution request.
@@ -140,25 +157,25 @@ chrome.commands.onCommand.addListener(function (command){
   switch (command){
    case "setHeader":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 0.0};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 0};
         putInDoc(obj);
      });
       break;
    case "setTitle":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 1.0};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 1};
         putInDoc(obj);
      });
       break;
    case "setSubsection":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 2.0};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 2};
         putInDoc(obj);
      });
       break;
    case "setDetail":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 3.0};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 3};
         putInDoc(obj);
      });
        break;
