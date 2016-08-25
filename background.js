@@ -1,5 +1,31 @@
 
 var docUrl = "";
+var authToken = "";
+var head = document.getElementsByTagName('head')[0];
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = "https://apis.google.com/js/client.js?onload=callbackFunction";
+head.appendChild(script);
+
+var CLIENT_ID = '6344508761-1uii1p3je2jnt4innp07fbk8rvq66976.apps.googleusercontent.com';
+var SCOPES = ['https://www.googleapis.com/auth/drive'];
+
+function checkAuth() {
+ gapi.auth.authorize(
+   {
+     'client_id': CLIENT_ID,
+     'scope': SCOPES.join(' '),
+     'immediate': true
+   }, makeSureAuthorized);
+}
+function makeSureAuthorized(authResult) {
+  if (authResult.error) {
+    gapi.auth.authorize(
+        {client_id: CLIENT_ID, scope: SCOPES, immediate: false});
+      return false;
+    }
+}
+
 
 chrome.runtime.onInstalled.addListener(function() {
   chrome.contextMenus.create({
@@ -47,6 +73,13 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
    case "Url":
    chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
      docUrl = tabs[0].url;
+    //  checkAuth();
+      chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+        console.log(token);
+        gapi.auth.setToken({
+          'access_token': token
+        });
+      });
     });
        break;
   }
@@ -62,74 +95,64 @@ function captureCallback(callback){
   });
 }
 
-// chrome.tabs.query({active: true, currentWindow: true}, function(tabArray){
-//   chrome.tabs.executeScript(tabArray[0].id, {
-//     code : "window.getSelection().toString()"
-//   }, function(results){
-//     console.log("inputing header " + results[0]);
-//   });
-// });
-// var serialize = function(obj) {
-//   var str = [];
-//   for(var p in obj)
-//     if (obj.hasOwnProperty(p)) {
-//       str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-//     }
-//   return str.join("&");
-// };
-//
-// var sendRequest = function(params){
-//   var http = new XMLHttpRequest();
-//   var url = "https://script.google.com/macros/s/AKfycbzeeUL07OcUG7kBJiKwKPuabnAPYL_tSmlDEtRUy6eyw_nhz2A/exec";
-//   var params = serialize(params);
-//   http.open("POST", url, true);
-//
-//   //Send the proper header information along with the request
-//   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//
-//   http.onreadystatechange = function() {
-//       if(http.readyState == 4 && http.status == 200) {
-//           console.log("request made");
-//       }
-//   }
-//   http.send(params);
-// };
 
 function putInDoc(dataobj){
-  $(document).ready(function () {
-   $.ajax({
-     url: "https://script.google.com/macros/s/AKfycbwADtcsloxMU9h-_1Y_FXjW6JifgkWTeW-qh6fO0hd9ye8T5OTq/exec",
-     data: dataobj,
-     type: "GET"
+  var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
+
+ // Create execution request.
+   var request = {
+       'function': 'insertText',
+       'parameters': dataobj
+   };
+
+ // Make the request.
+   var op = gapi.client.request({
+        'root': 'https://script.googleapis.com',
+        'path': 'v1/scripts/' + scriptId + ':run',
+        'method': 'POST',
+        'body': request
    });
-  });
+
+ op.execute(function(resp) {
+  if (resp.error && resp.error.status) {
+    // The API encountered a problem before the script started executing.
+    console.log('Error calling API: ' + JSON.stringify(resp, null, 2));
+  } else if (resp.error) {
+    // The API executed, but the script returned an error.
+    var error = resp.error.details[0];
+    console.log('Script error! Message: ' + error.errorMessage);
+  } else {
+    // Here, the function returns an array of strings.
+    console.log("success!");
+  }
+});
 }
 
 
 chrome.commands.onCommand.addListener(function (command){
-  var obj = "";
+  var obj = {};
   switch (command){
    case "setHeader":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 1};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 0.0};
         putInDoc(obj);
      });
       break;
    case "setTitle":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 2};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 1.0};
         putInDoc(obj);
      });
       break;
    case "setSubsection":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 3};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 2.0};
         putInDoc(obj);
      });
       break;
    case "setDetail":
      captureCallback(function(capturedString){
-        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 4};
+        obj= {"docUrl": docUrl, "capturedText": capturedString, "nestNumber": 3.0};
         putInDoc(obj);
      });
        break;
