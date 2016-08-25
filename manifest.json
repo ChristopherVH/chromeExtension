@@ -30,6 +30,7 @@
   "browser_action": {
         "default_popup": "popup.html"
   },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnr7/ibWbXC9zbhj1utI3DD8I9a+5Ru9dxkEGYgEtTqFIf0VXoVgkqxMCGhrn8ES/jOEyF0/QUySKK9evfKaaeRcCL8AUZbWuO2IOQeRHT7TsV0xpXG1o7BvsQ1M/yuTCc+kvNJ4JQxKmSCrf8V5bcKPsXxTKfetVLFzouw5KkYdF3Ob/4Sd8gQaxC2b7Mbw7B6KkzQDEeSxaZi4z37C5P8k+2ZUHZsd4yj8T0WozukbLtwE3vdWeWrtZZ5eQwhvTB8s5AndKLyLWMWKFkKGixuLuwe3Z8Ahyb+av/VnwdQJ10SqlVdbZ1VIt5ZnD7J/2f1FHXVt30r0Txs7OqItf/QIDAQAB",
   "content_security_policy": "script-src 'self' https://*.google.com https://*.google.com; object-src 'self'",
   "commands": {
           "setHeader": {

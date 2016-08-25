@@ -97,35 +97,41 @@ function captureCallback(callback){
 
 
 function putInDoc(dataobj){
-  var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
-
- // Create execution request.
-   var request = {
-       'function': 'insertText',
-       'parameters': dataobj
-   };
-
- // Make the request.
-   var op = gapi.client.request({
-        'root': 'https://script.googleapis.com',
-        'path': 'v1/scripts/' + scriptId + ':run',
-        'method': 'POST',
-        'body': request
+  $.ajax({
+     url: "https://script.google.com/macros/s/AKfycbwADtcsloxMU9h-_1Y_FXjW6JifgkWTeW-qh6fO0hd9ye8T5OTq/exec",
+     data: dataobj,
+     type: "GET"
    });
-
- op.execute(function(resp) {
-  if (resp.error && resp.error.status) {
-    // The API encountered a problem before the script started executing.
-    console.log('Error calling API: ' + JSON.stringify(resp, null, 2));
-  } else if (resp.error) {
-    // The API executed, but the script returned an error.
-    var error = resp.error.details[0];
-    console.log('Script error! Message: ' + error.errorMessage);
-  } else {
-    // Here, the function returns an array of strings.
-    console.log("success!");
-  }
-});
+//   var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
+//
+//  // Create execution request.
+//    var request = {
+//        'function': 'insertText',
+//        'parameters': dataobj,
+//         "devMode": true
+//    };
+//
+//  // Make the request.
+//    var op = gapi.client.request({
+//         'root': 'https://script.googleapis.com',
+//         'path': 'v1/scripts/' + scriptId + ':run',
+//         'method': 'POST',
+//         'body': request
+//    });
+//
+//  op.execute(function(resp) {
+//   if (resp.error && resp.error.status) {
+//     // The API encountered a problem before the script started executing.
+//     console.log('Error calling API: ' + JSON.stringify(resp, null, 2));
+//   } else if (resp.error) {
+//     // The API executed, but the script returned an error.
+//     var error = resp.error.details[0];
+//     console.log('Script error! Message: ' + error.errorMessage);
+//   } else {
+//     // Here, the function returns an array of strings.
+//     console.log("success!");
+//   }
+// });
 }
 
 
