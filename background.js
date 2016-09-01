@@ -7,6 +7,7 @@ var script = document.createElement('script');
 script.type = 'text/javascript';
 script.src = "https://apis.google.com/js/client.js?onload=callbackFunction";
 head.appendChild(script);
+var accessToken;
 
 var CLIENT_ID = '6344508761-1uii1p3je2jnt4innp07fbk8rvq66976.apps.googleusercontent.com';
 var SCOPES = ['https://www.googleapis.com/auth/drive'];
@@ -77,6 +78,7 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
     //  checkAuth();
       chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
         console.log(token);
+        accessToken = token;
         gapi.auth.setToken({
           'access_token': token
         });
@@ -112,6 +114,9 @@ function putInDoc(dataobj){
          if (ajaxQueue.length > 0){
            putInDoc(ajaxQueue.shift());
          }
+       },
+       beforeSend : function( xhr ) {
+        xhr.setRequestHeader( 'Authorization', 'BEARER ' + accessToken );
        }
      });
   }else{
@@ -132,7 +137,6 @@ function putInDoc(dataobj){
 //    var op = gapi.client.request({
 //         'root': 'https://script.googleapis.com',
 //         'path': 'v1/scripts/' + scriptId + ':run',
-//         'method': 'POST',
 //         'body': request
 //    });
 //
