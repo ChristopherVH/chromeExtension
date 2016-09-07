@@ -3,7 +3,7 @@
 
   "name": "SimpleNotes",
   "description": "This extension allows for quick and simple copy paste notes",
-  "version": "1.3",
+  "version": "1.5",
   "icons": { "32": "note.png"},
   "browser_action": {
     "default_icon": "note.png",
@@ -20,11 +20,12 @@
   "oauth2": {
     "client_id": "6344508761-1uii1p3je2jnt4innp07fbk8rvq66976.apps.googleusercontent.com",
     "scopes": [
-      "https://www.googleapis.com/auth/documents"
+      "https://www.googleapis.com/auth/documents",
+      "https://www.googleapis.com/auth/drive"
     ]
   },
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["background.js", "jquery-3.1.0.min.js"],
     "persistent": false
   },
   "browser_action": {

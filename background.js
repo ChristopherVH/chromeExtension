@@ -5,27 +5,11 @@ script.src = "https://apis.google.com/js/client.js?onload=callbackFunction";
 head.appendChild(script);
 var accessToken;
 var docUrl;
+// var running = false;
+// var ajaxQueue = [];
 var manifest = chrome.runtime.getManifest();
-
 var CLIENT_ID = manifest.oauth2.client_id;
 var SCOPES = manifest.oauth2.scopes;
-
-function checkAuth() {
- gapi.auth.authorize(
-   {
-     'client_id': CLIENT_ID,
-     'scope': SCOPES,
-     'immediate': true
-   }, makeSureAuthorized);
-}
-function makeSureAuthorized(authResult) {
-  if (authResult.error) {
-    gapi.auth.authorize(
-        {client_id: CLIENT_ID, scope: SCOPES, immediate: false});
-      return false;
-    }
-  accessToken = gapi.auth.getToken().access_token;
-}
 
 
 chrome.runtime.onInstalled.addListener(function() {
@@ -34,14 +18,49 @@ chrome.runtime.onInstalled.addListener(function() {
     id: "Url",
     contexts: ['all']
   });
+  chrome.identity.onSignInChanged.addListener(
+    function(){
+      chrome.identity.removeCachedAuthToken({token: accessToken});
+    }
+  );
 });
 
+
+// function checkAuth() {
+//  gapi.auth.authorize(
+//    {
+//      'client_id': CLIENT_ID,
+//      'scope': SCOPES,
+//      'immediate': true
+//    }, makeSureAuthorized);
+// }
+//
+// function makeSureAuthorized(authResult) {
+//   if (authResult.error) {
+//     gapi.auth.authorize(
+//         {client_id: CLIENT_ID, scope: SCOPES, immediate: false});
+//   }
+//   accessToken = gapi.auth.getToken().access_token;
+//   console.log(accessToken);
+// }
+
+
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
-  // simple case working
   if (info.menuItemId === "Url"){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-     docUrl = tabs[0].url;
-     checkAuth();
+     docUrl = tabs[0].url + "?usp=sharing";
+     if (accessToken !== undefined){
+       chrome.identity.removeCachedAuthToken({ 'token': accessToken }, function(){
+          gapi.auth.setToken({});
+          console.log("removing token");
+       });
+     }
+    //  checkAuth();
+     chrome.identity.getAuthToken({interactive: true}, function(token){
+       accessToken = token;
+       console.log(token);
+       gapi.auth.setToken({'access_token': accessToken});
+     });
     });
   }
 });
@@ -60,9 +79,32 @@ function captureCallback(callback){
 
 
 function putInDoc(dataobj){
+  // if (running === false){
+  //   running = true;
+  //   $.ajax({
+  //      url: "https://script.google.com/macros/s/AKfycbwADtcsloxMU9h-_1Y_FXjW6JifgkWTeW-qh6fO0hd9ye8T5OTq/exec",
+  //      data: dataobj,
+  //      type: "GET",
+  //      success: function(){
+  //        console.log("request made!");
+  //        running = false;
+  //        if (ajaxQueue.length > 0){
+  //          putInDoc(ajaxQueue.shift());
+  //        }
+  //      },
+  //      error: function(err){
+  //        console.log("error " + err);
+  //      },
+  //      beforeSend : function( xhr ) {
+  //       xhr.setRequestHeader( 'Authorization', 'Bearer ' + accessToken );
+  //      }
+  //    });
+  // }else{
+  //   ajaxQueue.push(dataobj);
+  // }
 
   var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
-
+ //
  // Create execution request.
    var request = {
       'function': 'doGet',
@@ -78,14 +120,21 @@ function putInDoc(dataobj){
         'body': request
    });
  //
-  op.execute();
+ op.execute(function(resp) {
+ if (resp.error && resp.error.status) {
+   // The API encountered a problem before the script started executing.
+   console.log('Error calling API: ' + JSON.stringify(resp, null, 2));
+ } else if (resp.error) {
+   // The API executed, but the script returned an error.
+   var error = resp.error.details[0];
+   console.log('Script error! Message: ' + error.errorMessage);
+ } else {
+   // Here, the function returns an array of strings.
+   console.log(resp);
+   console.log("success!");
+ }
+ });
 }
-
-chrome.identity.onSignInChanged.addListener(
-  function(){
-    chrome.identity.removeCachedAuthToken(accessToken);
-  }
-);
 
 chrome.commands.onCommand.addListener(function (command){
   var obj = {};
