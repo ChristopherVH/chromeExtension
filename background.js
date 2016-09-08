@@ -21,7 +21,6 @@ chrome.runtime.onInstalled.addListener(function() {
       chrome.identity.removeCachedAuthToken({token: accessToken});
     }
   );
-  gapi.client.setApiKey("AIzaSyARDEQ0_kd9QbWkGrJqRe4JRLrRb1Eh97s");
 });
 
 
