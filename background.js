@@ -28,6 +28,7 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
   if (info.menuItemId === "Url"){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
      docUrl = tabs[0].url + "?usp=sharing";
+     console.log(docUrl);
      if (accessToken !== undefined){
        chrome.identity.removeCachedAuthToken({ 'token': accessToken }, function(){
           gapi.auth.setToken({});
@@ -70,7 +71,21 @@ function putInDoc(dataobj){
         'method': 'POST',
         'body': request
    });
- op.execute();
+
+   op.execute(function(resp) {
+   if (resp.error && resp.error.status) {
+     // The API encountered a problem before the script started executing.
+     console.log('Error calling API: ' + JSON.stringify(resp, null, 2));
+   } else if (resp.error) {
+     // The API executed, but the script returned an error.
+     var error = resp.error.details[0];
+     console.log('Script error! Message: ' + error.errorMessage);
+   } else {
+     // Here, the function returns an array of strings.
+     console.log(resp);
+     console.log("success!");
+   }
+   });
 }
 
 chrome.commands.onCommand.addListener(function (command){
