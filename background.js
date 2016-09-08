@@ -21,6 +21,7 @@ chrome.runtime.onInstalled.addListener(function() {
       chrome.identity.removeCachedAuthToken({token: accessToken});
     }
   );
+  gapi.client.setApiKey("AIzaSyARDEQ0_kd9QbWkGrJqRe4JRLrRb1Eh97s");
 });
 
 
@@ -60,8 +61,7 @@ function putInDoc(dataobj){
   var scriptId = "1pXWyWWSV05dJyloHFHRORnn9yrZxXqYu6AI8Md9UjCC_PSRUAGK1Kh67";
    var request = {
       'function': 'doGet',
-       'parameters': [dataobj],
-        "devMode": true
+       'parameters': [dataobj]
    };
 
  // Make the request.
